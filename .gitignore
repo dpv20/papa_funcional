@@ -1,0 +1,20 @@
+# Entornos virtuales
+constru/
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+
+# Streamlit (secrets)
+.streamlit/secrets.toml
+
+# SO / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

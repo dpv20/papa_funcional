@@ -36,7 +36,7 @@ def render_git_sync_button():
             p = p.parent
         return None
 
-    if st.button("💾 Guardar en base de datos nube (Git)", type="primary", use_container_width=True):
+    if st.button("💾 Guardar en la nube", type="primary", use_container_width=True):
         git = _get_git_cmd()
         if not git:
             st.error("Git no está disponible. Verifica instalación y PATH.")

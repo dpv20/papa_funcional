@@ -175,7 +175,7 @@ def _write_headers(ws, start_row: int, item_row: pd.Series) -> int:
     row += 1
     # 2) Escalado adicional solicitado
     #    << AQUÍ se modifican tamaños después del encabezado >>
-    scale_columns(ws, {"B": 1.1, "E": 1.1, "F": 1.1, "G": 1.1})
+    scale_columns(ws, {"B": 1.3, "E": 1.3, "F": 1.3, "G": 1.3})
 
     # Siguiente fila disponible
     return row + 1

@@ -1,2 +1,4 @@
 Item,Partida,Fecha,cantidad tipo,cantidad numero,moneda
-1.01,hola,26/01/2026,Dia,1.0,UF
+1.01,hola,26/01/2026,Dia,1.0,CLP
+1.02,partida 2,26/01/2026,GL,1.0,CLP
+2.01,test2,26/01/2026,Gal,1.0,CLP

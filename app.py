@@ -4,7 +4,7 @@ import subprocess
 from datetime import datetime
 
 from funciones.Trans_excel import render as render_crear_excel  # 👈 usa la vista con 3 botones
-from funciones.crear_pdf import render_crear_pdf
+
 
 # --- Configuración global ---
 st.set_page_config(page_title="Construction Budget", layout="wide")
@@ -112,8 +112,8 @@ with st.sidebar:
             "🛠️ Modificar ítem",
             "🗂️ Categorías",
             "💱 Monedas",
-            "📊 Crear Excel",
-            "🧾 Crear PDF",
+            "📊 Crear Unitario",
+            "🧾 Crear Detallado",
         ],
         index=0
     )
@@ -187,11 +187,12 @@ elif view == "💱 Monedas":
     except Exception as e:
         st.error(f"No se pudo cargar **Monedas**: {e}")
 
-elif view == "📊 Crear Excel":
+elif view == "📊 Crear Unitario":
     render_excel()
 
-elif view == "🧾 Crear PDF":
+elif view == "🧾 Crear Detallado":
     try:
-        render_crear_pdf()
+        from funciones.crear_detallado import render_crear_detallado
+        render_crear_detallado()
     except Exception as e:
-        st.error(f"No se pudo cargar **Crear PDF**: {e}")
+        st.error(f"No se pudo cargar **Crear Detallado**: {e}")

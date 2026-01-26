@@ -1,0 +1,98 @@
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+Checking parent '01'. Candidates: ['01', '01.0', '01.00']
+  NO MATCH found. defaulting to SECCIÓN 01
+
+--- Debug Project: ejemplo1 ---
+All Items: ['1.01']
+Parents found: ['1']
+Checking parent '1'. Candidates: ['1', '1.0', '1.00']
+  NO MATCH found. defaulting to SECCIÓN 1
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+Checking parent '01'. Candidates: ['01', '01.0', '01.00']
+  NO MATCH found. defaulting to SECCIÓN 01
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+Checking parent '01'. Candidates: ['01', '01.0', '01.00']
+  NO MATCH found. defaulting to SECCIÓN 01
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+Checking parent '01'. Candidates: ['01', '01.0', '01.00']
+  NO MATCH found. defaulting to SECCIÓN 01
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+
+--- Debug Project: ejemplo1 ---
+All Items: ['1.01']
+Parents found: ['1']
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+
+--- Debug Project: ejemplo1 ---
+All Items: ['1.01', '1.02', '2.01']
+Parents found: ['1', '2']
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+
+--- Debug Project: ejemplo1 ---
+All Items: ['1.01', '1.02', '2.01']
+Parents found: ['1', '2']
+
+--- Debug Project: ejemplo1 ---
+All Items: ['1.01', '1.02', '2.01']
+Parents found: ['1', '2']
+
+--- Debug Project: ejemplo1 ---
+All Items: ['1.01', '1.02', '2.01']
+Parents found: ['1', '2']
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+
+--- Debug Project: ejemplo1 ---
+All Items: ['1.01', '1.02', '2.01']
+Parents found: ['1', '2']
+
+--- Debug Project: ejemplo1 ---
+All Items: ['1.01', '1.02', '2.01']
+Parents found: ['1', '2']
+
+--- Debug Project: ejemplo1 ---
+All Items: ['1.01', '1.02', '2.01']
+Parents found: ['1', '2']
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']
+
+--- Debug Project: asdasda ---
+All Items: ['01.01']
+Parents found: ['01']

@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, Alignment
+from .monedas import get_moneda_value
 
 # ---------------- estilos ----------------
 THIN = Side(style="thin")
@@ -18,10 +19,12 @@ CENTER_NOWRAP = Alignment(horizontal="center", vertical="center", wrap_text=Fals
 LEFT = Alignment(horizontal="left", vertical="center", wrap_text=True)
 RIGHT = Alignment(horizontal="right", vertical="center", wrap_text=True)
 
-# Formatos numéricos (comma style)
-FMT_QTY = '#,##0'       # Cantidades sin decimales
-FMT_MONEY = '#,##0'     # Precios/Totales sin decimales
-FMT_GENERIC = '#,##0.00'
+# Formatos numéricos con locale español (punto para miles, coma para decimales)
+# [$-340A] = código de locale para español (Chile)
+# La sintaxis Excel usa , para miles y . para decimales, el locale lo renderiza invertido
+FMT_QTY = '[$-340A]#,##0.00'      # Cantidades con 2 decimales
+FMT_MONEY = '[$-340A]#,##0.00'    # Precios/Totales con 2 decimales
+FMT_GENERIC = '[$-340A]#,##0.00'
 
 # Orden sugerido de tipos
 TYPE_ORDER = [
@@ -36,16 +39,11 @@ TYPE_ORDER = [
 # ---------------- columnas ----------------
 def set_column_widths(ws):
     """
-    Tamaños base:
-      A: 0.25x usual
-      B: 1x usual
-      C: 4x usual
-      D: 0.5x usual
-      E,F,G: 1x usual
+    Anchos fijos de columnas:
+      A: 2.5, B: 11.29, C: 34.0, D: 4.4, E: 11.29, F: 11.29, G: 11.29
     """
-    usual = 8.43
-    widths = {"A": usual * 0.25, "B": usual, "C": usual * 4, "D": usual * 0.5,
-              "E": usual, "F": usual, "G": usual}
+    widths = {"A": 2.5, "B": 11.29, "C": 34.0, "D": 4.4,
+              "E": 11.29, "F": 11.29, "G": 11.29}
     for col, w in widths.items():
         ws.column_dimensions[col].width = w
 
@@ -145,7 +143,10 @@ def _write_headers(ws, start_row: int, item_row: pd.Series) -> int:
     row += 3
     ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=3)
     ws.cell(row=row, column=2, value=f"ITEM: {item_row['Item']}").font = BOLD
-    ws.cell(row=row, column=6, value=f"CANTIDAD ({item_row['cantidad tipo']}):").font = BOLD
+    ws.merge_cells(start_row=row, start_column=5, end_row=row, end_column=6)
+    cant_cell = ws.cell(row=row, column=5, value=f"CANTIDAD ({item_row['cantidad tipo']}):")
+    cant_cell.font = BOLD
+    cant_cell.alignment = RIGHT
     set_num(ws.cell(row=row, column=7), item_row['cantidad numero'], fmt=FMT_QTY, bold=True)
 
     row += 1
@@ -173,17 +174,15 @@ def _write_headers(ws, start_row: int, item_row: pd.Series) -> int:
 
     # 1) Fila en blanco solicitada tras el encabezado
     row += 1
-    # 2) Escalado adicional solicitado
-    #    << AQUÍ se modifican tamaños después del encabezado >>
-    scale_columns(ws, {"B": 1.3, "E": 1.3, "F": 1.3, "G": 1.3})
 
     # Siguiente fila disponible
     return row + 1
 
-def _write_tipo_block(ws, start_row: int, det_tipo: pd.DataFrame, tipo_name: str) -> tuple[int, float]:
+def _write_tipo_block(ws, start_row: int, det_tipo: pd.DataFrame, tipo_name: str, factor_conversion: float = 1.0) -> tuple[int, float]:
     """
     Escribe bloque para un 'tipo' específico (si hay filas).
     Retorna (siguiente_row, subtotal_tipo).
+    factor_conversion: divide los precios CLP por este valor (ej: 39718.89 para UF).
     """
     if det_tipo.empty:
         return start_row, 0.0
@@ -207,7 +206,9 @@ def _write_tipo_block(ws, start_row: int, det_tipo: pd.DataFrame, tipo_name: str
         desc = r.get("Resumen", "")
         ud = r.get("Ud", "")
         cant = float(r.get("cantidad", 0) or 0)
-        unit = float(r.get("Pres", 0) or 0)
+        unit_clp = float(r.get("Pres", 0) or 0)
+        # Aplicar conversión de moneda
+        unit = unit_clp / factor_conversion if factor_conversion > 0 else unit_clp
         total = cant * unit
         subtotal += total
 
@@ -215,9 +216,9 @@ def _write_tipo_block(ws, start_row: int, det_tipo: pd.DataFrame, tipo_name: str
         ws.cell(row=row, column=3, value=desc)
         ws.cell(row=row, column=4, value=ud)
 
-        set_num(ws.cell(row=row, column=5), cant, fmt=FMT_QTY)       # Cantidad (sin dec)
-        set_num(ws.cell(row=row, column=6), unit, fmt=FMT_MONEY)     # P. Unitario
-        set_num(ws.cell(row=row, column=7), total, fmt=FMT_MONEY)    # Total
+        set_num(ws.cell(row=row, column=5), cant, fmt=FMT_QTY)       # Cantidad
+        set_num(ws.cell(row=row, column=6), unit, fmt=FMT_MONEY)     # P. Unitario (convertido)
+        set_num(ws.cell(row=row, column=7), total, fmt=FMT_MONEY)    # Total (convertido)
 
         draw_all_borders(ws, f"B{row}:G{row}")
         row += 1
@@ -262,10 +263,16 @@ def generar_excel(proyecto: str,
     # Cargar mapeo de tipos desde categorias.csv (si existe)
     tipo_mapping = _load_tipo_mapping(base)
 
+    # Leer moneda del proyecto (de la primera fila de datos.csv)
+    moneda_proyecto = "CLP"
+    if not df_datos.empty and "moneda" in df_datos.columns:
+        moneda_proyecto = str(df_datos["moneda"].iloc[0] or "CLP")
+    factor_conversion = get_moneda_value(moneda_proyecto)
+
     # --- Workbook ---
     wb = Workbook()
     ws = wb.active
-    ws.title = "APU"
+    ws.title = f"APU ({moneda_proyecto})"
     # << AQUÍ se fijan los tamaños base de columnas >>
     set_column_widths(ws)
 
@@ -320,7 +327,7 @@ def generar_excel(proyecto: str,
         otros_tipos = sorted(presentes - set(TYPE_ORDER))
         for tipo in tipos_presentes + otros_tipos:
             det_tipo = det_full[det_full["Tipo"].astype(str).str.upper() == tipo]
-            row, sub_t = _write_tipo_block(ws, row, det_tipo, tipo)
+            row, sub_t = _write_tipo_block(ws, row, det_tipo, tipo, factor_conversion)
             if sub_t > 0:
                 subtotales.append(sub_t)
 

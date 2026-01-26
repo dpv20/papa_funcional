@@ -111,6 +111,7 @@ with st.sidebar:
             "➕ Agregar ítem",
             "🛠️ Modificar ítem",
             "🗂️ Categorías",
+            "💱 Monedas",
             "📊 Crear Excel",
             "🧾 Crear PDF",
         ],
@@ -178,6 +179,13 @@ elif view == "🗂️ Categorías":
         render_add_category()
     except Exception as e:
         st.error(f"No se pudo cargar **Categorías**: {e}")
+
+elif view == "💱 Monedas":
+    try:
+        from funciones.gestionar_monedas import render_gestionar_monedas
+        render_gestionar_monedas()
+    except Exception as e:
+        st.error(f"No se pudo cargar **Monedas**: {e}")
 
 elif view == "📊 Crear Excel":
     render_excel()

@@ -30,9 +30,9 @@ def load_presupuesto(nombre: str):
 
     if "Fecha" in datos_df.columns:
         datos_df["Fecha"] = datos_df["Fecha"].astype(str)
-    for c in ["cantidad numero", "moneda"]:
-        if c in datos_df.columns:
-            datos_df[c] = pd.to_numeric(datos_df[c], errors="coerce")
+    # Moneda ahora es texto (CLP, UF, USD), no convertir a numérico
+    if "cantidad numero" in datos_df.columns:
+        datos_df["cantidad numero"] = pd.to_numeric(datos_df["cantidad numero"], errors="coerce")
     if "cantidad" in detalle_df.columns:
         detalle_df["cantidad"] = pd.to_numeric(detalle_df["cantidad"], errors="coerce")
     return datos_df, detalle_df

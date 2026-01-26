@@ -4,6 +4,7 @@ from .presupuesto_utils import (
     load_catalogo, save_presupuesto, empty_datos_df, empty_detalle_df,
     catalog_selector_with_qty, today_str
 )
+from .monedas import list_monedas_codes
 
 DEFAULT_ITEM = "01.01"
 QTY_KEY = "nuevo_qty_map"            # {Codigo(str): cantidad(float)}
@@ -66,9 +67,9 @@ def _attempt_save(nombre: str) -> bool:
     # Tipos seguros
     if "Fecha" in datos_to_save.columns:
         datos_to_save["Fecha"] = datos_to_save["Fecha"].astype(str)
-    for c in ["cantidad numero", "moneda"]:
-        if c in datos_to_save.columns:
-            datos_to_save[c] = pd.to_numeric(datos_to_save[c], errors="coerce").fillna(0)
+    # Moneda es texto (CLP, UF, USD), no convertir a numérico
+    if "cantidad numero" in datos_to_save.columns:
+        datos_to_save["cantidad numero"] = pd.to_numeric(datos_to_save["cantidad numero"], errors="coerce").fillna(0)
     if not detalle_to_save.empty and "cantidad" in detalle_to_save.columns:
         detalle_to_save["cantidad"] = pd.to_numeric(detalle_to_save["cantidad"], errors="coerce").fillna(0)
 
@@ -103,7 +104,7 @@ def render_presupuesto_nuevo():
         st.session_state["np_fecha"] = today_str()
         st.session_state["np_cant_tipo"] = ""
         st.session_state["np_cant_num"] = 1.0
-        st.session_state["np_moneda"] = 1.0
+        st.session_state["np_moneda"] = "CLP"
 
         # limpiar selects/editores previos del catálogo
         for k in list(st.session_state.keys()):
@@ -127,14 +128,15 @@ def render_presupuesto_nuevo():
     with col4:
         st.number_input("Cantidad número", min_value=0.0, step=1.0, key="np_cant_num")
     with col5:
-        st.number_input("Moneda", min_value=0.0, step=1.0, key="np_moneda")
+        monedas_opts = list_monedas_codes()
+        default_idx = monedas_opts.index("CLP") if "CLP" in monedas_opts else 0
+        st.selectbox("Moneda", options=monedas_opts, index=default_idx, key="np_moneda")
 
-    # Tomar valores desde session_state (una sola fuente de verdad)
     partida = st.session_state.get("np_partida", "")
     fecha_str = st.session_state.get("np_fecha", today_str())
     cant_tipo = st.session_state.get("np_cant_tipo", "")
     cant_num = float(st.session_state.get("np_cant_num", 1.0) or 0.0)
-    moneda = float(st.session_state.get("np_moneda", 1.0) or 0.0)
+    moneda = st.session_state.get("np_moneda", "CLP")
 
     # Mantener datos_df (fila única 01.01)
     datos_df = empty_datos_df()
@@ -144,7 +146,7 @@ def render_presupuesto_nuevo():
         "Fecha": str(fecha_str).strip(),
         "cantidad tipo": cant_tipo,
         "cantidad numero": float(cant_num),
-        "moneda": float(moneda),
+        "moneda": str(moneda),
     }
     st.session_state["nuevo_datos_df"] = datos_df
 

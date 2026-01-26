@@ -9,6 +9,7 @@ from .presupuesto_utils import (
     load_catalogo, empty_datos_df, empty_detalle_df,
     catalog_selector_with_qty, today_str, clp, presup_folder
 )
+from .monedas import list_monedas_codes
 
 # ----------------- Helpers de ordenamiento (NUEVO) -----------------
 def _norm_item_code(code: str, width: int = 6) -> str:
@@ -51,7 +52,7 @@ def _sort_both_by_item(datos_df: pd.DataFrame, detalle_df: pd.DataFrame):
 
 # ----------------- Helpers existentes -----------------
 def _upsert_item(datos_df: pd.DataFrame, item_code: str, partida: str, fecha: str,
-                 cant_tipo: str, cant_num: float, moneda: float) -> pd.DataFrame:
+                 cant_tipo: str, cant_num: float, moneda: str) -> pd.DataFrame:
     """Inserta o actualiza una fila en datos.csv para Item=item_code."""
     datos = datos_df.copy()
     mask = (datos["Item"].astype(str) == str(item_code))
@@ -61,7 +62,7 @@ def _upsert_item(datos_df: pd.DataFrame, item_code: str, partida: str, fecha: st
         "Fecha": str(fecha).strip(),
         "cantidad tipo": cant_tipo,
         "cantidad numero": float(cant_num),
-        "moneda": float(moneda),
+        "moneda": str(moneda),
     }
     if mask.any():
         idx = datos.index[mask][0]
@@ -129,7 +130,7 @@ def _keys_for_item(state_prefix: str, item_code: str):
 def _rename_item_and_consolidate(datos_df: pd.DataFrame, detalle_df: pd.DataFrame,
                                  old_item: str, new_item: str,
                                  partida: str, fecha_str: str,
-                                 cant_tipo: str, cant_num: float, moneda: float):
+                                 cant_tipo: str, cant_num: float, moneda: str):
     """
     Renombra old_item -> new_item en datos.csv y detalle.csv.
     - Upsertea la fila del nuevo ítem en datos.csv con los valores indicados.
@@ -364,7 +365,10 @@ def render_modificar_presupuesto():
         with c4:
             cant_num = st.number_input("Cantidad número", min_value=0.0, value=float(row.get("cantidad numero", 0) or 0), step=1.0)
         with c5:
-            moneda = st.number_input("Moneda", min_value=0.0, value=float(row.get("moneda", 1) or 1), step=1.0)
+            monedas_opts = list_monedas_codes()
+            current_moneda = str(row.get("moneda", "CLP") or "CLP")
+            moneda_idx = monedas_opts.index(current_moneda) if current_moneda in monedas_opts else 0
+            moneda = st.selectbox("Moneda", options=monedas_opts, index=moneda_idx, key=f"{state_prefix}_moneda_exist")
 
         # Guardar cambios del ÍTEM (datos.csv) + rename (detalle.csv) + consolidación
         if st.button("💠 Guardar cambios del ítem"):
@@ -511,7 +515,8 @@ def render_modificar_presupuesto():
         with c5:
             cant_num_new = st.number_input("Cantidad número", min_value=0.0, value=1.0, step=1.0, key=f"{state_prefix}_new_num")
         with c6:
-            moneda_new = st.number_input("Moneda", min_value=0.0, value=1.0, step=1.0, key=f"{state_prefix}_new_moneda")
+            monedas_opts_new = list_monedas_codes()
+            moneda_new = st.selectbox("Moneda", options=monedas_opts_new, index=0, key=f"{state_prefix}_new_moneda")
 
         if not item_new.strip():
             st.info("Ingresa el código del ítem nuevo para habilitar el catálogo y el detalle.")

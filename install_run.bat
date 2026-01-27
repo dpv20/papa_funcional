@@ -1,3 +1,2 @@
 @echo off
-%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File "%~dp0funciones\install_run.ps1"
-pause
+powershell -ExecutionPolicy Bypass -File "%~dp0funciones\install_run.ps1"

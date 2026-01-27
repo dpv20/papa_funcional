@@ -21,3 +21,6 @@ Thumbs.db
 
 # Instaladores (binarios grandes)
 *.exe
+
+# Scripts locales
+run_app.cmd

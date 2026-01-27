@@ -137,15 +137,6 @@ if (Test-Path $IconAppPath) { $Shortcut.IconLocation = $IconAppPath }
 $Shortcut.Description = "Abrir app de presupuesto (Streamlit)"
 $Shortcut.Save()
 
-Write-Host "==> Acceso directo del INSTALADOR apuntando al .bat de RAÍZ..."
-$InstLnk = Join-Path $Desktop $InstShortcut
-$Shortcut2 = $WshShell.CreateShortcut($InstLnk)
-$Shortcut2.TargetPath = $InstallerBatPath          # <-- .bat en la RAÍZ
-$Shortcut2.WorkingDirectory = $Root
-if (Test-Path $IconInstPath) { $Shortcut2.IconLocation = $IconInstPath }  # media\pavez_logo.ico
-$Shortcut2.Description = "Instalar / Reparar Pavez"
-$Shortcut2.Save()
-
 # ------------- (Opcional) Push inicial -------------
 Write-Host "==> (Opcional) Git push..."
 if ($DoGitPush -and (Test-Path (Join-Path $Root ".git"))) {

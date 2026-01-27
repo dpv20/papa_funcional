@@ -109,15 +109,7 @@ cd /d "%~dp0"
 "%~dp0$VenvName\Scripts\python.exe" -m streamlit run app.py
 "@ | Out-File -Encoding ascii $RunCmdPath -Force
 
-Write-Host "==> Generando 'run_app_hidden.vbs' en raíz..."
-$VbsPath = Join-Path $Root "run_app_hidden.vbs"
-@'
-Set fso = CreateObject("Scripting.FileSystemObject")
-Set shell = CreateObject("WScript.Shell")
-scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
-cmd = """" & scriptDir & "\run_app.cmd" & """"
-shell.Run cmd, 0, False
-'@ | Out-File -Encoding ascii $VbsPath -Force
+# run_app_hidden.vbs eliminado - ya no se genera
 
 # ------------- Instalador .BAT en RAÍZ (no en funciones) -------------
 Write-Host "==> Wrapper 'install_run.bat' en raíz..."
@@ -134,14 +126,14 @@ if (Test-Path $OldBat) { Remove-Item $OldBat -Force }
 # ------------- Accesos directos en Escritorio -------------
 $Desktop = [Environment]::GetFolderPath("Desktop")
 
-Write-Host "==> Acceso directo APP (sin consola)..."
+Write-Host "==> Acceso directo APP..."
 $AppLnk  = Join-Path $Desktop $AppShortcut
 $WshShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut($AppLnk)
-$Shortcut.TargetPath = $VbsPath
+$Shortcut.TargetPath = $RunCmdPath
 $Shortcut.WorkingDirectory = $Root
 if (Test-Path $IconAppPath) { $Shortcut.IconLocation = $IconAppPath }
-$Shortcut.Description = "Abrir app de presupuesto (Streamlit, sin consola)"
+$Shortcut.Description = "Abrir app de presupuesto (Streamlit)"
 $Shortcut.Save()
 
 Write-Host "==> Acceso directo del INSTALADOR apuntando al .bat de RAÍZ..."

@@ -116,7 +116,8 @@ Write-Host "==> Wrapper 'install_run.bat' en raíz..."
 $InstallerBatPath = Join-Path $Root "install_run.bat"
 @"
 @echo off
-powershell -ExecutionPolicy Bypass -File "%~dp0funciones\install_run.ps1"
+%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File "%~dp0funciones\install_run.ps1"
+pause
 "@ | Out-File -Encoding ascii $InstallerBatPath -Force
 
 # (Opcional) borra el .bat viejo en funciones si existía

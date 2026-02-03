@@ -100,8 +100,7 @@ def render_modify_item():
 
     # Optimización: Mapa de resúmenes para renderizado rápido
     # Aseguramos que la llave sea string para hacer match con el selectbox
-    # drop_duplicates() asegura que si hay códigos duplicados, tomemos el primero (como hacía iloc[0])
-    resumen_map = {str(k): v for k, v in filt.drop_duplicates(subset=["Codigo"], keep="first").set_index("Codigo")["Resumen"].to_dict().items()}
+    resumen_map = {str(k): v for k, v in filt.set_index("Codigo")["Resumen"].to_dict().items()}
 
     # Seleccionar ítem por Código (no escribirlo)
     codigo_sel = st.selectbox(

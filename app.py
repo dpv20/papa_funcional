@@ -61,20 +61,20 @@ def render_git_sync_button():
             rc = run([git, "commit", "-m", msg])               # 2) commit (puede no haber cambios)
             nothing = "nothing to commit" in (rc.stdout + rc.stderr).lower()
 
-            # 3) pull --rebase (asegura fast-forward)
-            pr = run([git, "pull", "--rebase", "origin", branch])
+            # 3) pull con estrategia de merge favoreciendo cambios locales (-X ours)
+            # -X ours: en caso de conflicto, se queda con la versión local.
+            # --no-rebase: hace un merge commit en lugar de rebase (más seguro para mezcla automática)
+            pr = run([git, "pull", "--no-rebase", "-X", "ours", "origin", branch])
+            
             if pr.returncode != 0:
-                # Rama sin upstream configurado: la configuramos y reintentamos
+                # Si falló, quizás falta upstream
                 if "There is no tracking information" in (pr.stdout + pr.stderr):
                     run([git, "branch", "--set-upstream-to", f"origin/{branch}", branch])
-                    pr = run([git, "pull", "--rebase", "origin", branch])
+                    pr = run([git, "pull", "--no-rebase", "-X", "ours", "origin", branch])
 
-            # Conflictos
-            if pr.returncode != 0 and "CONFLICT" in (pr.stdout + pr.stderr):
-                st.error(
-                    "Hay conflictos de merge durante el rebase. Resuélvelos y vuelve a intentar.\n"
-                    "Pistas: `git status`, edita archivos en conflicto, `git add`, `git rebase --continue`."
-                )
+            # Si aún así falla
+            if pr.returncode != 0:
+                st.error("Error al sincronizar. Revisa la salida de Git.")
                 with st.expander("Ver salida de Git"):
                     st.code("\n".join(outs), language="bash")
                 return

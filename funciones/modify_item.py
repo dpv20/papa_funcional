@@ -98,11 +98,15 @@ def render_modify_item():
         st.warning("No hay ítems para la combinación seleccionada.")
         return
 
+    # Optimización: Mapa de resúmenes para renderizado rápido
+    resumen_map = filt.set_index("Codigo")["Resumen"].to_dict()
+
     # Seleccionar ítem por Código (no escribirlo)
     codigo_sel = st.selectbox(
         "Ítem",
         options=sorted(filt["Codigo"].astype(str).tolist()),
-        format_func=lambda x: f"{x} — {filt.loc[filt['Codigo'].astype(str)==x, 'Resumen'].iloc[0]}"
+        # Uso de .get(x, '') es O(1) vs el .loc[...] previo que era O(N) por cada item renderizado
+        format_func=lambda x: f"{x} — {resumen_map.get(x, '')}"
     )
 
     # Detalle actual

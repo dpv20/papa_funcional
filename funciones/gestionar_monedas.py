@@ -49,6 +49,6 @@ def render_gestionar_monedas():
     
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("1 UF =", f"${uf_val:,.0f} CLP".replace(",", "."))
+        st.metric("1 UF =", f"${uf_val:,.2f} CLP")
     with col2:
-        st.metric("1 USD =", f"${usd_val:,.0f} CLP".replace(",", "."))
+        st.metric("1 USD =", f"${usd_val:,.2f} CLP")

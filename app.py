@@ -99,7 +99,7 @@ def render_git_sync_button():
 # --- Sidebar ---
 with st.sidebar:
     if logo_path.exists():
-        st.image(str(logo_path))
+        st.image(str(logo_path), width=100)
     st.title("Menú")
 
     view = st.radio(
@@ -112,8 +112,8 @@ with st.sidebar:
             "🛠️ Modificar ítem",
             "🗂️ Categorías",
             "💱 Monedas",
-            "📊 Crear Unitario",
-            "🧾 Crear Detallado",
+            "📊 Prep. Unitario",
+            "🧾 Prep. Detallado",
         ],
         index=0
     )
@@ -121,6 +121,47 @@ with st.sidebar:
     st.divider()
     # Botón de sync Git en la sidebar:
     render_git_sync_button()
+
+    st.divider()
+    with st.container():
+        st.subheader("Indicadores")
+        
+        # Importar función de actualización (lazy import para evitar ciclos si los hubiera)
+        from funciones.actualizar_monedas import actualizar_indicadores
+        
+        if st.button("🔄 Actualizar indicadores"):
+            with st.spinner("Actualizando..."):
+                if actualizar_indicadores():
+                    st.success("¡Actualizado!")
+                    st.rerun()
+                else:
+                    st.error("Actualización fallida, intente más tarde")
+
+        try:
+            p_monedas = Path("monedas.csv")
+            if p_monedas.exists():
+                 with open(p_monedas, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
+                    uf_val = "-"
+                    usd_val = "-"
+                    for line in lines:
+                        parts = line.strip().split(",")
+                        if len(parts) >= 3:
+                            if parts[0] == "UF":
+                                try:
+                                    uf_val = "{:,.2f}".format(float(parts[2]))
+                                except ValueError:
+                                    uf_val = parts[2]
+                            elif parts[0] == "USD":
+                                try:
+                                    usd_val = "{:,.2f}".format(float(parts[2]))
+                                except ValueError:
+                                    usd_val = parts[2]
+                    
+                    st.write(f"**UF:** ${uf_val}")
+                    st.write(f"**USD:** ${usd_val}")
+        except Exception:
+            pass
 
 
 # --- Vistas locales ---
@@ -187,10 +228,10 @@ elif view == "💱 Monedas":
     except Exception as e:
         st.error(f"No se pudo cargar **Monedas**: {e}")
 
-elif view == "📊 Crear Unitario":
+elif view == "📊 Prep. Unitario":
     render_excel()
 
-elif view == "🧾 Crear Detallado":
+elif view == "🧾 Prep. Detallado":
     try:
         from funciones.crear_detallado import render_crear_detallado
         render_crear_detallado()
